@@ -13,6 +13,8 @@ import EditPage from './EditPage';
 import ManageCardsScreen from './ManageCards';
 import UpdateProfileScreen from './UpdateProfile';
 import DoorControlScreen from './DoorControlScreen';
+import ManageUsersScreen from './ManageUsers';
+import ManageImageScreen from './ManageImage';
 export {
   HomeScreen,
   LoginScreen,
@@ -29,4 +31,6 @@ export {
   ManageCardsScreen,
   UpdateProfileScreen,
   DoorControlScreen,
+  ManageUsersScreen,
+  ManageImageScreen,
 };

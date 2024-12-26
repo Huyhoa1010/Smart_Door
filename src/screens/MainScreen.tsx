@@ -1,34 +1,54 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useEffect, useState} from 'react';
-import {View, Text, ScrollView} from 'react-native';
+import {View, Text, ScrollView, Image, RefreshControl} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import {colors} from '../constants';
 import {getAllLogs} from '../APIServices/API';
-import {Image} from 'react-native';
 
-const MainScreen = ({navigation, route}: any) => {
+const MainScreen = ({navigation}: any) => {
   const [logs, setLogs] = useState<any[]>([]);
-  const {devices} = route.params || {devices: []};
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const fetchLogs = async () => {
+    try {
+      const data = await getAllLogs();
+      console.log('data:', data);
+      setLogs(data);
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const data = await getAllLogs();
-        console.log('data:', data);
-        setLogs(data);
-      } catch (error) {
-        console.error('Error fetching logs:', error);
-      }
-    };
-
     fetchLogs();
   }, []);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchLogs();
+    setRefreshing(false);
+  };
+
+  const handleNullData = (data: any, defaultValue: any) => {
+    return data !== null && data !== undefined ? data : defaultValue;
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${day}/${month}/${year}, ${hours}h ${minutes}p ${seconds}s`;
+  };
+
   return (
-    <ScrollView style={{flex: 100}}>
+    <View style={{flex: 1, backgroundColor: colors.primary}}>
       <View
         style={{
-          flex: 10,
+          flex: 0.13,
           backgroundColor: colors.font,
           flexDirection: 'row',
           alignItems: 'center',
@@ -49,14 +69,18 @@ const MainScreen = ({navigation, route}: any) => {
       </View>
       <View
         style={{
-          flex: 10,
+          flex: 0.1,
           height: 50,
           backgroundColor: 'rgba(0,0,0,0.2)',
           justifyContent: 'center',
         }}>
         <Text style={{color: 'red', fontSize: 15, paddingStart: 10}}>Logs</Text>
       </View>
-      <ScrollView style={{flex: 80, padding: 10}}>
+      <ScrollView
+        style={{flex: 0.7, padding: 10, backgroundColor: colors.primary}}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         {logs.map((log: any, index: any) => (
           <View
             key={index}
@@ -65,19 +89,38 @@ const MainScreen = ({navigation, route}: any) => {
               padding: 10,
               backgroundColor: '#fff',
               borderRadius: 10,
+              flexDirection: 'row',
             }}>
-            <Text>Card Number: {log.card_number}</Text>
-            <Text>Action Type: {log.action_type}</Text>
-            <Text>Status: {log.status}</Text>
-            <Text>Time: {log.timestamp}</Text>
-            <Image
-              source={{uri: log.image}}
-              style={{width: 150, height: 150}}
-            />
+            <View style={{flex: 1}}>
+              <Text>
+                <Text style={{fontWeight: 'bold'}}>Card Number:</Text>{' '}
+                {handleNullData(log.card_number, 'N/A')}
+              </Text>
+              <Text>
+                <Text style={{fontWeight: 'bold'}}>Action Type:</Text>{' '}
+                {handleNullData(log.action_type, 'N/A')}
+              </Text>
+              <Text>
+                <Text style={{fontWeight: 'bold'}}>Status:</Text>{' '}
+                {handleNullData(log.status, 'N/A')}
+              </Text>
+              <Text>
+                <Text style={{fontWeight: 'bold'}}>Time:</Text>{' '}
+                {formatTimestamp(handleNullData(log.timestamp, 'N/A'))}
+              </Text>
+            </View>
+            {log.image ? (
+              <Image
+                source={{uri: log.image}}
+                style={{width: '45%', height: '100%', borderRadius: 10}}
+              />
+            ) : (
+              <Text>No Image Available</Text>
+            )}
           </View>
         ))}
       </ScrollView>
-    </ScrollView>
+    </View>
   );
 };
 

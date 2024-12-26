@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ScrollView,
   Text,
@@ -10,8 +10,22 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import colors from '../constants/colors';
 import {UIHeader} from '../components';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AccountInformation = ({navigation}: any) => {
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  useEffect(() => {
+    const fetchIsAdmin = async () => {
+      const isAdminValue = await AsyncStorage.getItem('isAdmin');
+      setIsAdmin(isAdminValue ? JSON.parse(isAdminValue) : null);
+    };
+
+    fetchIsAdmin();
+  }, []);
+
+  if (isAdmin === null) {
+    return null; // or a loading spinner
+  }
   const handleSignOut = () => {
     Alert.alert(
       'Sign out',
@@ -65,7 +79,17 @@ const AccountInformation = ({navigation}: any) => {
             <Icon name="angle-right" size={20} style={styles.menuArrow} />
           </View>
         </TouchableOpacity>
-        <View style={styles.sectionHeader}>
+        <TouchableOpacity onPress={() => navigation.navigate('Manage Users')}>
+          {isAdmin && (
+            <View style={styles.menuItem}>
+              <Icon name="users" size={20} style={styles.menuIcon} />
+              <Text style={styles.menuText}>Manage Users</Text>
+              <View style={styles.menuSpacer} />
+              <Icon name="angle-right" size={20} style={styles.menuArrow} />
+            </View>
+          )}
+        </TouchableOpacity>
+        {/* <View style={styles.sectionHeader}>
           <Text style={styles.sectionHeaderText}>Gateway</Text>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate('Gateway')}>
@@ -91,7 +115,7 @@ const AccountInformation = ({navigation}: any) => {
             <View style={styles.menuSpacer} />
             <Icon name="angle-right" size={20} style={styles.menuArrow} />
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionHeaderText}>Devices</Text>
         </View>
@@ -120,12 +144,14 @@ const AccountInformation = ({navigation}: any) => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Scan Device')}>
-          <View style={styles.menuItem}>
-            <Icon name="barcode" size={20} style={styles.menuIcon} />
-            <Text style={styles.menuText}>Scan devices</Text>
-            <View style={styles.menuSpacer} />
-            <Icon name="angle-right" size={20} style={styles.menuArrow} />
-          </View>
+          {isAdmin && (
+            <View style={styles.menuItem}>
+              <Icon name="barcode" size={20} style={styles.menuIcon} />
+              <Text style={styles.menuText}>Capture Images</Text>
+              <View style={styles.menuSpacer} />
+              <Icon name="angle-right" size={20} style={styles.menuArrow} />
+            </View>
+          )}
         </TouchableOpacity>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionHeaderText}>More</Text>

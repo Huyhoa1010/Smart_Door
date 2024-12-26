@@ -41,7 +41,7 @@ const ScanDevice = ({navigation}: any) => {
   };
 
   const toggleCameraType = () => {
-    setCameraType(prevType =>
+    setCameraType((prevType: any) =>
       prevType === RNCamera.Constants.Type.front
         ? RNCamera.Constants.Type.back
         : RNCamera.Constants.Type.front,
@@ -59,7 +59,7 @@ const ScanDevice = ({navigation}: any) => {
         ref={cameraRef}
         style={styles.preview}
         type={cameraType}
-        flashMode={RNCamera.Constants.FlashMode.on}
+        flashMode={RNCamera.Constants.FlashMode.off}
         captureAudio={false}
       />
       <View style={{flex: 0, flexDirection: 'row', justifyContent: 'center'}}>

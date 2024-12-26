@@ -1,19 +1,36 @@
 /* eslint-disable react/no-unstable-nested-components */
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   AccountInformation,
   MainScreen,
-  ScanDevice,
+  //ScanDevice,
   ManageCardsScreen,
   DoorControlScreen,
+  ManageImageScreen,
 } from '../screens';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import {colors} from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Tab = createMaterialBottomTabNavigator();
 
 function UITab() {
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const fetchIsAdmin = async () => {
+      const isAdminValue = await AsyncStorage.getItem('isAdmin');
+      setIsAdmin(isAdminValue ? JSON.parse(isAdminValue) : null);
+    };
+
+    fetchIsAdmin();
+  }, []);
+
+  if (isAdmin === null) {
+    return null; // or a loading spinner
+  }
+
   return (
     <Tab.Navigator
       initialRouteName="Main"
@@ -35,13 +52,13 @@ function UITab() {
         }}
       />
       <Tab.Screen
-        name="Mangage Devices"
+        name="ManageDevices"
         component={ManageCardsScreen}
         options={{
-          tabBarLabel: 'Mangage Cards',
+          tabBarLabel: 'Manage Cards',
           tabBarIcon: ({focused}) => (
             <Icon
-              name="solar-panel"
+              name="address-card"
               size={20}
               color={focused ? colors.font : colors.inactive}
             />
@@ -49,7 +66,7 @@ function UITab() {
         }}
       />
       <Tab.Screen
-        name="Door Control"
+        name="DoorControl"
         component={DoorControlScreen}
         options={{
           tabBarLabel: 'Door Control',
@@ -62,20 +79,22 @@ function UITab() {
           ),
         }}
       />
-      <Tab.Screen
-        name="ScanDevice"
-        component={ScanDevice}
-        options={{
-          tabBarLabel: 'Scan Device',
-          tabBarIcon: ({focused}) => (
-            <Icon
-              name="qrcode"
-              size={20}
-              color={focused ? colors.font : colors.inactive}
-            />
-          ),
-        }}
-      />
+      {isAdmin && (
+        <Tab.Screen
+          name="ManageImages"
+          component={ManageImageScreen}
+          options={{
+            tabBarLabel: 'Manage Images',
+            tabBarIcon: ({focused}) => (
+              <Icon
+                name="image"
+                size={20}
+                color={focused ? colors.font : colors.inactive}
+              />
+            ),
+          }}
+        />
+      )}
       <Tab.Screen
         name="Account"
         component={AccountInformation}
@@ -93,4 +112,5 @@ function UITab() {
     </Tab.Navigator>
   );
 }
+
 export default UITab;

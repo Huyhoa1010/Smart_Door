@@ -44,7 +44,7 @@ const LoginScreen = ({navigation}: any) => {
       } else {
         await AsyncStorage.setItem('token', data.data.token);
         setLoading(false);
-        navigation.navigate('Main');
+        navigation.navigate('UITab');
       }
     } catch (error) {
       setLoading(false);
@@ -102,14 +102,14 @@ const LoginScreen = ({navigation}: any) => {
               color: 'black',
               fontWeight: 'bold',
             }}>
-            Email:
+            Username:
           </Text>
           <TextInput
             onChangeText={text => setEmail(text)}
             style={{
               color: 'black',
             }}
-            placeholder="Enter your email here"
+            placeholder="Enter your email/username here"
             placeholderTextColor={colors.placeholder}
           />
           <View

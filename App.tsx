@@ -15,6 +15,7 @@ import {
   ManageDevicesScreen,
   ScanDevice,
   UpdateProfileScreen,
+  ManageUsersScreen,
 } from './src/screens';
 import UITab from './src/navigation/UITab';
 
@@ -80,6 +81,11 @@ const App = () => {
         <Stack.Screen
           name="Update Profile"
           component={UpdateProfileScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Manage Users"
+          component={ManageUsersScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

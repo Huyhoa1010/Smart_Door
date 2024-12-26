@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {root_domain, root_python} from '../../environment';
@@ -23,25 +24,27 @@ const getToken = async (): Promise<string | null> => {
 // Add a request interceptor to include the token in the Authorization header
 api.interceptors.request.use(
   async config => {
-    const token = await getToken(); // Retrieve the token from AsyncStorage
+    const token = await getToken();
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`; // Add the token to the headers
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config; // Return the modified config
+    return config;
   },
   error => {
     return Promise.reject(error);
   },
 );
 
-// Example API functions:
-
 // Login
 export const login = async (username: string, password: string) => {
   try {
     const response = await api.post('/login', {username, password});
     console.log('Login response:', response.data.data.token);
-
+    console.log('Login response:', response.data.data.isAdmin);
+    await AsyncStorage.setItem(
+      'isAdmin',
+      JSON.stringify(response.data.data.isAdmin),
+    );
     // Save token in AsyncStorage
     await AsyncStorage.setItem('token', response.data.data.token);
 
@@ -53,15 +56,20 @@ export const login = async (username: string, password: string) => {
 };
 
 // Register
-export const register = async (username: string, password: string) => {
-  try {
-    const response = await api.post('/register', {username, password});
-    return response.data;
-  } catch (error) {
-    console.error('Error during registration:', error);
-    throw error;
-  }
-};
+// export const register = async (
+//   username: string,
+//   password: string,
+//   passdoor: string,
+//   ten: string,
+// ) => {
+//   try {
+//     const response = await api.post('/register', {username, password});
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error during registration:', error);
+//     throw error;
+//   }
+// };
 
 // Forgot Password
 export const forgotPassword = async (username: string) => {
@@ -155,6 +163,8 @@ export const updateProfile = async (
   ten: string,
   password: string,
   passdoor: string,
+  email: string,
+  phoneNumber: string,
 ) => {
   try {
     const response = await api.put('/update-profile', {
@@ -198,4 +208,67 @@ export const openDoor = async () => {
     console.error('Error open door:', error);
     throw error;
   }
+};
+
+// Get All Users
+export const getAllUsers = async () => {
+  try {
+    const response = await api.get('/get-all-users');
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
+};
+
+// get images
+export const getAllImages = async () => {
+  try {
+    const response = await api1.get('/listanh');
+    console.log('response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching images:', error);
+    throw error;
+  }
+};
+
+// delete image
+export const deleteImage = async (imageUrl: string) => {
+  try {
+    // Extract the filename from the URL
+    // const filename = imageUrl.split('/').pop();
+    const response = await api1.post('/deletemb', {filename: imageUrl});
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    throw error;
+  }
+};
+
+// add user
+export const addUsers = async (
+  username: string,
+  password: string,
+  passdoor: string,
+  ten: string,
+) => {
+  console.log('username:', username);
+  console.log('password:', password);
+  console.log('passdoor:', passdoor);
+  console.log('ten:', ten);
+  const response = await api.post('/register', {
+    username: username,
+    password: password,
+    passdoor: passdoor,
+    ten: ten,
+  });
+  return response.data;
+};
+
+// delete user
+export const deleteUser = async (username: string) => {
+  console.log('username:', username);
+  const response = await api.post('/deleteUser', {username: username});
+  return response.data;
 };

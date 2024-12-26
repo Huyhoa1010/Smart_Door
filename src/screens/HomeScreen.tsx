@@ -18,7 +18,7 @@ const HomeScreen = ({navigation}: any) => {
         flex: 100,
       }}>
       <ImageBackground
-        source={images.background}
+        source={images.background_smartdoor}
         resizeMode="cover"
         style={{
           flex: 100,
@@ -82,7 +82,7 @@ const HomeScreen = ({navigation}: any) => {
               color: 'black',
               fontWeight: 'bold',
             }}>
-            Smart Farm App!
+            Smart Home App!
           </Text>
         </View>
         <View
