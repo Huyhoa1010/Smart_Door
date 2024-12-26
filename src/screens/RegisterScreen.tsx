@@ -113,7 +113,7 @@ const RegisterScreen = ({navigation}: any) => {
               color: 'black',
               fontWeight: 'bold',
             }}>
-            Email:
+            Email/Username:
           </Text>
           <TextInput
             onChangeText={text => {
@@ -127,7 +127,7 @@ const RegisterScreen = ({navigation}: any) => {
             style={{
               color: 'black',
             }}
-            placeholder="Enter your email here"
+            placeholder="Enter your email/username here"
             placeholderTextColor={colors.placeholder}
           />
           <View

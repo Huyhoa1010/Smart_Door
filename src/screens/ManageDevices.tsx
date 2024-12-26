@@ -87,11 +87,7 @@ const ManageDevicesScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <UIHeader
-        navigation={navigation}
-        title="Manage Devices"
-        goBackScreen="Main"
-      />
+      <UIHeader navigation={navigation} title="Manage Devices" />
       <View style={styles.body}>
         <View style={styles.stepContainer}>
           <ThemedText type="subtitle" style={styles.centeredTextSub}>

@@ -26,11 +26,7 @@ const ScheduleDeviceScreen: React.FC = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <UIHeader
-        navigation={navigation}
-        title="Schedule Devices"
-        goBackScreen="Account"
-      />
+      <UIHeader navigation={navigation} title="Schedule Devices" />
       <ScrollView style={styles.body}>
         <Text style={styles.label}>Lập Lịch</Text>
         <TextInput
