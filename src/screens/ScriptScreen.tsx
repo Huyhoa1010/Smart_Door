@@ -22,7 +22,7 @@ const ScriptScreen: React.FC = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <UIHeader navigation={navigation} title="Script" goBackScreen="Account" />
+      <UIHeader navigation={navigation} title="Script" />
       <View style={styles.body}>
         <Text style={styles.label}>Kịch bản</Text>
         <TextInput

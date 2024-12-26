@@ -45,11 +45,7 @@ const NewPage = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <UIHeader
-        navigation={navigation}
-        title="New Device"
-        goBackScreen="Manage Devices"
-      />
+      <UIHeader navigation={navigation} title="New Device" />
       <View style={styles.body}>
         <View style={styles.stepContainer}>
           <ThemedText type="subtitle" style={styles.centeredTextSub}>

@@ -64,11 +64,7 @@ const UpdateProfileScreen = ({navigation}: any) => {
 
   return (
     <View style={{flex: 1}}>
-      <UIHeader
-        navigation={navigation}
-        title="Update Profile"
-        goBackScreen="Account"
-      />
+      <UIHeader navigation={navigation} title="Update Profile" />
       <View style={styles.container}>
         <Text style={styles.label}>Name:</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} />
