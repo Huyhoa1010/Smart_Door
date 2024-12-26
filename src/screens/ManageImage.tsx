@@ -2,7 +2,6 @@ import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   Alert,
   FlatList,
@@ -10,12 +9,12 @@ import {
   StyleSheet,
 } from 'react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
-import ImageResizer from 'react-native-image-resizer'; // Import the resizer
+import ImageResizer from 'react-native-image-resizer';
 import UIHeader from '../components/UIHeader';
 import {getAllImages, deleteImage, uploadImage} from '../APIServices/API';
 import {colors} from '../constants';
 import FastImage from 'react-native-fast-image';
-const ManageImageScreen = ({navigation}) => {
+const ManageImageScreen = ({navigation}: any) => {
   const [images, setImages] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -40,14 +39,14 @@ const ManageImageScreen = ({navigation}) => {
       Alert.alert('Success', 'Image deleted');
       fetchImages();
     } catch (error) {
-      console.error('Delete Image Error:', error); // Improved error logging
+      console.error('Delete Image Error:', error);
       Alert.alert('Error', 'Cannot delete image');
     }
   };
 
   const pickAndUploadImage = () => {
     launchImageLibrary(
-      {mediaType: 'photo', selectionLimit: 1}, // Limit to single selection for simplicity
+      {mediaType: 'photo', selectionLimit: 1},
       async response => {
         if (response.didCancel) {
           console.log('User cancelled image picker');
@@ -92,7 +91,7 @@ const ManageImageScreen = ({navigation}) => {
       .catch(() => setRefreshing(false));
   }, []);
 
-  const renderItem = ({item}) => (
+  const renderItem = ({item}: any) => (
     <View style={styles.imageContainer}>
       <FastImage
         style={styles.image}
@@ -112,7 +111,7 @@ const ManageImageScreen = ({navigation}) => {
       </TouchableOpacity>
     </View>
   );
-  const keyExtractor = (item, index) => `${item.url}-${index}`;
+  const keyExtractor = (item: any, index: any) => `${item.url}-${index}`;
 
   return (
     <View style={styles.container}>
@@ -190,9 +189,9 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    aspectRatio: 1, // Maintain a 1:1 aspect ratio
+    aspectRatio: 1,
     borderRadius: 8,
-    backgroundColor: '#e1e4e8', // Placeholder color while loading
+    backgroundColor: '#e1e4e8',
   },
   noImagesText: {
     textAlign: 'center',

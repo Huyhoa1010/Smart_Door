@@ -10,6 +10,7 @@ import {
   Image,
   Alert,
   TextInput,
+  RefreshControl,
 } from 'react-native';
 import {colors} from '../constants';
 import {
@@ -19,24 +20,27 @@ import {
   deleteCard,
 } from '../APIServices/API';
 import CustomAlertBoxNew from '../components/CustomAlertBoxNew';
+import UIHeader from '../components/UIHeader';
 
-const ManageCardsScreen = () => {
+const ManageCardsScreen = ({navigation}: any) => {
   const [fetchedData, setFetchedData] = useState<any[]>([]);
   const [showAlertNew, setShowAlertNew] = useState(false);
   const [showAlertEdit, setShowAlertEdit] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const [newCardName, setNewCardName] = useState('');
   const [newCardNumber, setNewCardNumber] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const data = await getAllCards();
+      setFetchedData(data);
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getAllCards();
-        setFetchedData(data);
-      } catch (error) {
-        console.error('Error fetching cards:', error);
-      }
-    };
     fetchData();
   }, []);
 
@@ -54,9 +58,7 @@ const ManageCardsScreen = () => {
       await createCard(newCardName, newCardNumber);
       Alert.alert('Success', 'Card created successfully');
       setShowAlertNew(false);
-      // Refresh the card list
-      const data = await getAllCards();
-      setFetchedData(data);
+      fetchData();
     } catch (error) {
       Alert.alert('Error', 'Failed to create card');
     }
@@ -67,9 +69,7 @@ const ManageCardsScreen = () => {
       await updateCard(selectedCard.id, newCardName, newCardNumber);
       Alert.alert('Success', 'Card updated successfully');
       setShowAlertEdit(false);
-      // Refresh the card list
-      const data = await getAllCards();
-      setFetchedData(data);
+      fetchData();
     } catch (error) {
       Alert.alert('Error', 'Failed to update card');
     }
@@ -80,31 +80,60 @@ const ManageCardsScreen = () => {
       await deleteCard(selectedCard.id);
       Alert.alert('Success', 'Card deleted successfully');
       setShowAlertEdit(false);
-      // Refresh the card list
-      const data = await getAllCards();
-      setFetchedData(data);
+      fetchData();
     } catch (error) {
       Alert.alert('Error', 'Failed to delete card');
     }
   };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getDate()}/${
+      date.getMonth() + 1
+    }/${date.getFullYear()} ${date.getHours()}h${date.getMinutes()}p${date.getSeconds()}s`;
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Manage Cards</Text>
+      <UIHeader navigation={navigation} title="Manage Cards" />
+
+      <View style={styles.newButtonContainer}>
+        <TouchableOpacity style={styles.newButton} onPress={handleNewPress}>
+          <Text style={styles.newButtonText}>New Card</Text>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.newButton} onPress={handleNewPress}>
-        <Text style={styles.newButtonText}>New Card</Text>
-      </TouchableOpacity>
-
-      <ScrollView style={styles.scrollView} indicatorStyle="black">
+      <ScrollView
+        style={styles.scrollView}
+        indicatorStyle="black"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         {fetchedData.map((item, index) => (
           <View key={index} style={styles.cardContainer}>
-            <Text>ID: {item.id}</Text>
-            <Text>Name: {item.ten}</Text>
-            <Text>Card ID: {item.id_the}</Text>
-            <Text>Card Number: {item.card_number}</Text>
-            <Text>Time: {item.ngaytao}</Text>
+            <Text style={styles.boldText}>
+              ID: <Text style={styles.normalText}>{item.id}</Text>
+            </Text>
+            <Text style={styles.boldText}>
+              Name: <Text style={styles.normalText}>{item.ten}</Text>
+            </Text>
+            <Text style={styles.boldText}>
+              Card ID: <Text style={styles.normalText}> {item.id_the}</Text>
+            </Text>
+            <Text style={styles.boldText}>
+              Card Number:{' '}
+              <Text style={styles.normalText}>{item.card_number}</Text>
+            </Text>
+            <Text style={styles.boldText}>
+              Time:{' '}
+              <Text style={styles.normalText}>{formatDate(item.ngaytao)}</Text>
+            </Text>
             {item.image && (
               <Image source={{uri: item.image}} style={styles.image} />
             )}
@@ -130,34 +159,6 @@ const ManageCardsScreen = () => {
                 <Text style={styles.deleteButtonText}>Delete</Text>
               </TouchableOpacity>
             </View>
-
-            {/* <TouchableOpacity
-              onPress={() => handleOptionPressRond(index)}
-              style={styles.touchable}>
-              {selectedOption === index ? (
-                <View style={styles.largeCircle}>
-                  <View style={styles.roundContainer}>
-                    {[...Array(3)].map((_, optionIndex) => (
-                      <View
-                        key={optionIndex}
-                        style={[
-                          styles.optionDot,
-                          selectedOption === index && styles.selectedOptionDot,
-                        ]}
-                      />
-                    ))}
-                  </View>
-                </View>
-              ) : (
-                <View style={styles.largeCircle}>
-                  <View style={styles.roundContainer}>
-                    {[...Array(3)].map((_, optionIndex) => (
-                      <View key={optionIndex} style={styles.optionDot} />
-                    ))}
-                  </View>
-                </View>
-              )}
-            </TouchableOpacity> */}
           </View>
         ))}
       </ScrollView>
@@ -167,22 +168,24 @@ const ManageCardsScreen = () => {
           visible={showAlertNew}
           message={
             <View>
-              <Text>Enter Card Name:</Text>
+              <Text style={{fontWeight: 'bold'}}>Enter Card Name:</Text>
               <TextInput
                 style={{
                   backgroundColor: '#fff',
                   borderRadius: 5,
                   marginBottom: 10,
+                  marginTop: 5,
                 }}
                 value={newCardName}
                 onChangeText={setNewCardName}
               />
-              <Text>Enter Card Number:</Text>
+              <Text style={{fontWeight: 'bold'}}>Enter Card Number:</Text>
               <TextInput
                 style={{
                   backgroundColor: '#fff',
                   borderRadius: 5,
                   marginBottom: 10,
+                  marginTop: 5,
                 }}
                 value={newCardNumber}
                 onChangeText={setNewCardNumber}
@@ -202,22 +205,24 @@ const ManageCardsScreen = () => {
           visible={showAlertEdit}
           message={
             <View>
-              <Text>Edit Card Name:</Text>
+              <Text style={{fontWeight: 'bold'}}>Edit Card Name:</Text>
               <TextInput
                 style={{
                   backgroundColor: '#fff',
                   borderRadius: 5,
                   marginBottom: 10,
+                  marginTop: 5,
                 }}
                 value={newCardName}
                 onChangeText={setNewCardName}
               />
-              <Text>Edit Card Number:</Text>
+              <Text style={{fontWeight: 'bold'}}>Edit Card Number:</Text>
               <TextInput
                 style={{
                   backgroundColor: '#fff',
                   borderRadius: 5,
                   marginBottom: 10,
+                  marginTop: 5,
                 }}
                 value={newCardNumber}
                 onChangeText={setNewCardNumber}
@@ -256,13 +261,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  newButtonContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
   newButton: {
-    width: 100,
+    width: 150,
     backgroundColor: 'tomato',
-    padding: 8,
+    padding: 10,
     borderRadius: 5,
-    alignSelf: 'flex-end',
-    marginRight: 10,
   },
   newButtonText: {
     color: '#fff',
@@ -279,6 +286,12 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#fff',
     borderRadius: 10,
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  normalText: {
+    fontWeight: 'normal',
   },
   image: {
     width: 150,
@@ -314,33 +327,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
-  },
-  touchable: {
-    marginTop: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  largeCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  roundContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: 30,
-  },
-  optionDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ccc',
-  },
-  selectedOptionDot: {
-    backgroundColor: colors.primary,
   },
 });

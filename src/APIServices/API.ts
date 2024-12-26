@@ -55,6 +55,29 @@ export const login = async (username: string, password: string) => {
   }
 };
 
+// export const login = async (username: string, password: string) => {
+//   try {
+//     const response = await api.post('/login', {username, password});
+//     const token = response.data.data.token;
+//     const isAdmin = response.data.data.isAdmin;
+
+//     // Store token if it exists
+//     if (token) {
+//       await AsyncStorage.setItem('token', token);
+//     }
+
+//     // Store isAdmin status if it exists, convert to string
+//     if (isAdmin !== undefined) {
+//       await AsyncStorage.setItem('isAdmin', JSON.stringify(isAdmin));
+//     }
+
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error during login:', error);
+//     throw error;
+//   }
+// };
+
 // Register
 // export const register = async (
 //   username: string,

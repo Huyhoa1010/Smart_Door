@@ -16,6 +16,7 @@ import {
   ScanDevice,
   UpdateProfileScreen,
   ManageUsersScreen,
+  ManageImageScreen,
 } from './src/screens';
 import UITab from './src/navigation/UITab';
 
@@ -86,6 +87,11 @@ const App = () => {
         <Stack.Screen
           name="Manage Users"
           component={ManageUsersScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Manage Images"
+          component={ManageImageScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

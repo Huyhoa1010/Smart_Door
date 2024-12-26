@@ -24,7 +24,7 @@ const AccountInformation = ({navigation}: any) => {
   }, []);
 
   if (isAdmin === null) {
-    return null; // or a loading spinner
+    return null;
   }
   const handleSignOut = () => {
     Alert.alert(
@@ -50,7 +50,7 @@ const AccountInformation = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <UIHeader navigation={navigation} title="Settings" goBackScreen="Main" />
+      <UIHeader navigation={navigation} title="Settings" />
       <ScrollView>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionHeaderText}>Account</Text>
@@ -146,7 +146,7 @@ const AccountInformation = ({navigation}: any) => {
         <TouchableOpacity onPress={() => navigation.navigate('Scan Device')}>
           {isAdmin && (
             <View style={styles.menuItem}>
-              <Icon name="barcode" size={20} style={styles.menuIcon} />
+              <Icon name="camera" size={20} style={styles.menuIcon} />
               <Text style={styles.menuText}>Capture Images</Text>
               <View style={styles.menuSpacer} />
               <Icon name="angle-right" size={20} style={styles.menuArrow} />
