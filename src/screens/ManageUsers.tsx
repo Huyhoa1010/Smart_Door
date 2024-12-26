@@ -5,11 +5,11 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  Button,
   Alert,
   Modal,
   TouchableOpacity,
   TextInput,
+  RefreshControl,
 } from 'react-native';
 import {colors} from '../constants';
 import {UIHeader} from '../components';
@@ -18,6 +18,7 @@ import {getAllUsers, deleteUser, addUsers} from '../APIServices/API';
 const ManageUsersScreen: React.FC = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -26,19 +27,26 @@ const ManageUsersScreen: React.FC = ({navigation}: any) => {
   const [passdoor, setPassdoor] = useState('');
   const [ten, setTen] = useState('');
 
+  const fetchUsers = async () => {
+    try {
+      const data = await getAllUsers();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const data = await getAllUsers();
-        setUsers(data);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUsers();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchUsers();
+    setRefreshing(false);
+  };
 
   const handleDelete = async (userId: string) => {
     try {
@@ -79,29 +87,38 @@ const ManageUsersScreen: React.FC = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <UIHeader
-        navigation={navigation}
-        title="Manage Users"
-        goBackScreen="Account"
-      />
+      <UIHeader navigation={navigation} title="Manage Users" />
 
-      {/* Add User button at the top */}
       <View style={styles.addButtonContainer}>
-        <Button title="Add User" onPress={() => setShowModal(true)} />
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setShowModal(true)}>
+          <Text style={styles.addButtonText}>Add User</Text>
+        </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.body}>
+      <ScrollView
+        style={styles.body}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         {users.map((user, index) => (
           <View key={index} style={styles.userItem}>
-            <Text style={styles.userName}>Name: {user.ten}</Text>
-            <Text style={styles.userEmail}>Username: {user.user}</Text>
-            <Text style={styles.userRole}>Role: {user.role}</Text>
+            <Text style={styles.userName}>
+              Name: <Text style={styles.normalText}>{user.ten}</Text>
+            </Text>
+            <Text style={styles.userEmail}>
+              Username: <Text style={styles.normalText}>{user.user}</Text>
+            </Text>
+            <Text style={styles.userRole}>
+              Role: <Text style={styles.normalText}>{user.role}</Text>
+            </Text>
             <View style={styles.centeredDeleteButton}>
-              <Button
-                title="Delete"
-                onPress={() => handleDelete(user.user)}
-                color="red"
-              />
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDelete(user.user)}>
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
             </View>
           </View>
         ))}
@@ -132,17 +149,21 @@ const ManageUsersScreen: React.FC = ({navigation}: any) => {
               style={styles.input}
             />
             <TextInput
-              placeholder="Ten"
+              placeholder="Name"
               value={ten}
               onChangeText={setTen}
               style={styles.input}
             />
             <View style={styles.modalButtonRow}>
-              <TouchableOpacity onPress={() => setShowModal(false)}>
-                <Text style={styles.cancelButton}>Cancel</Text>
+              <TouchableOpacity
+                style={styles.modalButtonCancel}
+                onPress={() => setShowModal(false)}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleAddUser}>
-                <Text style={styles.confirmButton}>Add</Text>
+              <TouchableOpacity
+                style={styles.modalButtonAdd}
+                onPress={handleAddUser}>
+                <Text style={styles.confirmButtonText}>Add</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -173,6 +194,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     alignItems: 'center',
   },
+  addButton: {
+    backgroundColor: 'tomato',
+    padding: 10,
+    borderRadius: 5,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  normalText: {
+    fontWeight: 'normal',
+    fontSize: 16,
+  },
   userItem: {
     marginBottom: 10,
     padding: 10,
@@ -180,20 +215,32 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   userEmail: {
     fontSize: 16,
-    color: '#555',
+    fontWeight: 'bold',
   },
   userRole: {
     fontSize: 16,
-    color: '#555',
+    fontWeight: 'bold',
   },
   centeredDeleteButton: {
     alignItems: 'center',
     marginTop: 10,
+  },
+  deleteButton: {
+    backgroundColor: '#FF0000',
+    padding: 5,
+    borderRadius: 5,
+    width: 80,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   modalBackground: {
     flex: 1,
@@ -202,7 +249,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.primary,
     borderRadius: 10,
     padding: 16,
   },
@@ -217,7 +264,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 10,
     borderRadius: 8,
-    borderColor: '#ccc',
+    borderColor: colors.placeholder,
     borderWidth: 1,
   },
   modalButtonRow: {
@@ -225,13 +272,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 16,
   },
-  cancelButton: {
-    color: 'red',
-    marginRight: 10,
+  modalButtonCancel: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 5,
+    width: 80,
+    alignItems: 'center',
+  },
+  modalButtonAdd: {
+    backgroundColor: 'green',
+    padding: 10,
+    borderRadius: 5,
+    width: 80,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 12,
     fontWeight: 'bold',
   },
-  confirmButton: {
-    color: 'green',
+  confirmButtonText: {
+    color: '#fff',
+    fontSize: 12,
     fontWeight: 'bold',
   },
 });
