@@ -14,6 +14,7 @@
 1. Clone project về máy `git clone https://github.com/Huyhoa1010/Smart_Door.git`
 2. Mở project bằng Android Studio
 3. Chạy lệnh `npm install` để cài đặt các thư viện cần thiết
+4. Thay api bằng api của server
 4. Chạy lệnh `yard start` để khởi chạy project
 3. Chạy project trên máy ảo hoặc thiết bị thật bằng cách chạy lệnh `yard android` hoặc `yard ios`
 4. Chờ đợi và sử dụng ứng dụng
