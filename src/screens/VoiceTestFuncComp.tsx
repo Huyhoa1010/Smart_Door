@@ -1,5 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  RefreshControl,
+  ScrollView,
+} from 'react-native';
 import Voice, {
   SpeechResultsEvent,
   SpeechErrorEvent,
@@ -12,8 +20,19 @@ const VoiceTest = ({navigation}: any) => {
   const [results, setResults] = useState<string[]>([]);
   const [transcribedText, setTranscribedText] = useState('');
   const [error, setError] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [canStartRecording, setCanStartRecording] = useState(true);
 
   useEffect(() => {
+    const initVoice = async () => {
+      try {
+        await Voice.destroy();
+        await Voice.start('vi-VN');
+      } catch (e) {
+        console.error('Error initializing Voice:', e);
+      }
+    };
+
     Voice.onSpeechStart = onSpeechStart;
     Voice.onSpeechEnd = onSpeechEnd;
     Voice.onSpeechResults = onSpeechResults;
@@ -25,72 +44,141 @@ const VoiceTest = ({navigation}: any) => {
   }, []);
 
   const onSpeechStart = () => {
+    console.log('Speech started');
     setIsRecording(true);
+    setCanStartRecording(false);
+    setError('');
   };
 
-  const onSpeechEnd = () => {
+  const onSpeechEnd = async () => {
+    console.log('Speech ended');
     setIsRecording(false);
+    try {
+      await Voice.stop();
+    } catch (e) {
+      console.error('Error stopping voice:', e);
+      setCanStartRecording(true);
+    }
   };
 
   const onSpeechResults = (e: SpeechResultsEvent) => {
-    console.log('onSpeechResults: ', e);
+    console.log('onSpeechResults:', e);
     if (e.value && e.value.length > 0) {
       setResults(e.value);
       setTranscribedText(e.value[0]);
+      setCanStartRecording(true);
     }
   };
 
   const onSpeechError = (e: SpeechErrorEvent) => {
-    console.error('onSpeechError: ', e);
-    setError(JSON.stringify(e.error));
+    console.error('Speech error:', e);
+    setError(e.error?.message || 'Lỗi không xác định');
+    setIsRecording(false);
+    setCanStartRecording(true);
+  };
+
+  const resetState = () => {
+    setTranscribedText('');
+    setResults([]);
+    setError('');
   };
 
   const startRecording = async () => {
+    if (!canStartRecording) {
+      return;
+    }
     try {
+      await Voice.destroy();
       await Voice.start('vi-VN');
+      setIsRecording(true);
       setError('');
-      setResults([]);
     } catch (e) {
-      console.error('startRecording error:', e);
+      console.error('Error starting recording:', e);
+      setError('Không thể bắt đầu ghi âm');
+      setIsRecording(false);
+      setCanStartRecording(true);
     }
   };
 
   const stopRecording = async () => {
+    if (!isRecording) {
+      return;
+    }
     try {
       await Voice.stop();
+      setIsRecording(false);
     } catch (e) {
-      console.error('stopRecording error:', e);
+      console.error('Error stopping recording:', e);
+      setError('Không thể dừng ghi âm');
+      setCanStartRecording(true);
     }
   };
+
+  const handleRecordPress = async () => {
+    if (isRecording) {
+      await stopRecording();
+    } else if (canStartRecording) {
+      await startRecording();
+    }
+  };
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    resetState();
+    setCanStartRecording(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, []);
 
   return (
     <View style={styles.container}>
       <UIHeader navigation={navigation} title="Voice Recognition" />
-      <View style={styles.content}>
-        <View style={styles.transcriptionContainer}>
-          <Text style={styles.transcriptionLabel}>Văn bản chuyển đổi:</Text>
-          <Text style={styles.transcriptionText}>
-            {transcribedText || 'Bấm nút để bắt đầu nói...'}
-          </Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <View style={styles.content}>
+          <View style={styles.transcriptionContainer}>
+            <Text style={styles.transcriptionLabel}>Văn bản chuyển đổi:</Text>
+            <Text style={styles.transcriptionText}>
+              {transcribedText || 'Bấm nút để bắt đầu nói...'}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.recordButton,
+              isRecording ? styles.recordingButton : null,
+              !canStartRecording && !isRecording
+                ? styles.processingButton
+                : null,
+            ]}
+            onPress={handleRecordPress}
+            disabled={!canStartRecording && !isRecording}
+            activeOpacity={0.7}>
+            <Image
+              source={require('../services/access/button.png')}
+              style={[
+                styles.buttonImage,
+                !canStartRecording && !isRecording
+                  ? styles.disabledImage
+                  : null,
+              ]}
+            />
+            <Text style={styles.buttonText}>
+              {isRecording
+                ? 'Dừng'
+                : canStartRecording
+                ? 'Bấm để nói'
+                : 'Đang xử lý...'}
+            </Text>
+          </TouchableOpacity>
+
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
         </View>
-
-        <TouchableOpacity
-          style={[
-            styles.recordButton,
-            isRecording ? styles.recordingButton : null,
-          ]}
-          onPress={isRecording ? stopRecording : startRecording}>
-          <Image
-            source={require('../services/access/button.png')}
-            style={styles.buttonImage}
-          />
-          <Text style={styles.buttonText}>
-            {isRecording ? 'Dừng' : 'Bấm để nói'}
-          </Text>
-        </TouchableOpacity>
-
-        {error ? <Text style={styles.errorText}>Error: {error}</Text> : null}
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -99,6 +187,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary,
+  },
+  scrollView: {
+    flexGrow: 1,
   },
   content: {
     flex: 1,
@@ -147,10 +238,16 @@ const styles = StyleSheet.create({
   recordingButton: {
     backgroundColor: '#ff6b6b',
   },
+  processingButton: {
+    backgroundColor: '#cccccc',
+  },
   buttonImage: {
     width: 50,
     height: 50,
     marginBottom: 5,
+  },
+  disabledImage: {
+    opacity: 0.5,
   },
   buttonText: {
     color: '#333',
