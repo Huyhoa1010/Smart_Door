@@ -6,15 +6,15 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
-  Alert,
+  // Alert,
   KeyboardAvoidingView,
   Keyboard,
   ActivityIndicator,
 } from 'react-native';
 import {images, colors} from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import {login} from '../APIServices/API';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import {login} from '../APIServices/API';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({navigation}: any) => {
   const [keyboardIsShown, setKeyboardIsShown] = useState(false);
@@ -34,27 +34,28 @@ const LoginScreen = ({navigation}: any) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleLogin = async () => {
-    setLoading(true);
-    try {
-      const data = await login(email, password);
-      console.log('data:', data);
-      if (data.status === 'fail') {
-        setLoading(false);
-        Alert.alert('Login Error', data.message);
-      } else {
-        await AsyncStorage.setItem('token', data.data.token);
-        setLoading(false);
-        navigation.navigate('UITab');
-      }
-    } catch (error) {
-      setLoading(false);
-      if (error instanceof Error) {
-        Alert.alert('Login Error', error.message);
-      } else {
-        console.error('An unexpected error occurred:', error);
-        Alert.alert('Login Error', 'An unexpected error occurred');
-      }
-    }
+    // setLoading(true);
+    // try {
+    //   const data = await login(email, password);
+    //   console.log('data:', data);
+    //   if (data.status === 'fail') {
+    //     setLoading(false);
+    //     Alert.alert('Login Error', data.message);
+    //   } else {
+    //     await AsyncStorage.setItem('token', data.data.token);
+    //     setLoading(false);
+    //     navigation.navigate('UITab');
+    //   }
+    // } catch (error) {
+    //   setLoading(false);
+    //   if (error instanceof Error) {
+    //     Alert.alert('Login Error', error.message);
+    //   } else {
+    //     console.error('An unexpected error occurred:', error);
+    //     Alert.alert('Login Error', 'An unexpected error occurred');
+    //   }
+    // }
+    navigation.navigate('UITab');
   };
 
   return (

@@ -17,6 +17,7 @@ import {
   UpdateProfileScreen,
   ManageUsersScreen,
   ManageImageScreen,
+  VoiceTest,
 } from './src/screens';
 import UITab from './src/navigation/UITab';
 
@@ -92,6 +93,11 @@ const App = () => {
         <Stack.Screen
           name="Manage Images"
           component={ManageImageScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Voice Chatbot"
+          component={VoiceTest}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

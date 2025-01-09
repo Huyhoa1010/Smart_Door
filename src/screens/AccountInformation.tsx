@@ -89,6 +89,14 @@ const AccountInformation = ({navigation}: any) => {
             </View>
           )}
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Voice Chatbot')}>
+          <View style={styles.menuItem}>
+            <Icon name="microphone" size={20} style={styles.menuIcon} />
+            <Text style={styles.menuText}>Voice Chatbot</Text>
+            <View style={styles.menuSpacer} />
+            <Icon name="angle-right" size={20} style={styles.menuArrow} />
+          </View>
+        </TouchableOpacity>
         {/* <View style={styles.sectionHeader}>
           <Text style={styles.sectionHeaderText}>Gateway</Text>
         </View>

@@ -15,6 +15,7 @@ import UpdateProfileScreen from './UpdateProfile';
 import DoorControlScreen from './DoorControlScreen';
 import ManageUsersScreen from './ManageUsers';
 import ManageImageScreen from './ManageImage';
+import VoiceTest from './VoiceTestFuncComp';
 export {
   HomeScreen,
   LoginScreen,
@@ -33,4 +34,5 @@ export {
   DoorControlScreen,
   ManageUsersScreen,
   ManageImageScreen,
+  VoiceTest,
 };
